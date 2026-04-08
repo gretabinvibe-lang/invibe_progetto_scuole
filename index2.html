@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CRM Scuole</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d0f1a;--bg2:#161927;--bg3:#1e2236;--bg4:#252a40;
+  --text:#eef0f8;--text2:#8890b0;--text3:#555d80;
+  --border:#252a40;--border2:#2e3450;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--orange:#f97316;
+  --blue:#3b82f6;--purple:#8b5cf6;--wa:#25d366;
+  --r:12px
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px}
+body{display:flex;flex-direction:column}
+.app{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:68px}
+.page{display:none;padding:16px;max-width:680px;margin:0 auto}
+.page.on{display:block}
+
+/* NAV */
+nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:50}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--text3);font-size:9px;cursor:pointer;position:relative;padding:4px 2px}
+.nb.on{color:var(--blue)}
+.nb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nbadge{background:var(--red);color:#fff;font-size:8px;font-weight:700;border-radius:8px;padding:1px 5px;position:absolute;top:4px;left:calc(50% + 6px);min-width:16px;text-align:center;display:none}
+
+/* HEADER */
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.pt{font-size:19px;font-weight:700}
+.ps{font-size:11px;color:var(--text2);margin-top:2px}
+.hbs{display:flex;gap:8px}
+.ib{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
+.ib svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* BANNER */
+.bn{border-radius:10px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:12px}
+.bn.ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green)}
+.bn.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.bn.loading{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--blue)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:currentColor}
+.dot.bl{animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.btx{flex:1}
+
+/* KPI */
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden}
+.kl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.kv{font-size:30px;font-weight:800;line-height:1}
+.ks{font-size:10px;color:var(--text2);margin-top:4px}
+.kln{position:absolute;left:0;right:0;bottom:0;height:2px}
+.kc.tot .kv{color:var(--blue)}.kc.tot .kln{background:var(--blue)}
+.kc.ok  .kv{color:var(--green)}.kc.ok  .kln{background:var(--green)}
+.kc.att .kv{color:var(--yellow)}.kc.att .kln{background:var(--yellow)}
+.kc.no  .kv{color:var(--red)}.kc.no  .kln{background:var(--red)}
+
+/* SCADENZE HOME */
+.rb{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.rt{font-size:12px;font-weight:600;color:var(--yellow);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ri{background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.rif{flex:1;min-width:0}
+.rin{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rit{font-size:11px;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;flex-shrink:0}
+.rd.exp{background:rgba(239,68,68,.2);color:var(--red)}
+.rd.urg{background:rgba(245,158,11,.2);color:var(--yellow)}
+.rd.ok3{background:rgba(34,197,94,.15);color:var(--green)}
+.rwb{background:var(--wa);border:none;border-radius:7px;color:#fff;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0}
+.rwb:disabled{background:var(--bg4);color:var(--text3);cursor:default}
+.contact-time{font-size:9px;color:var(--text3);margin-left:6px;white-space:nowrap}
+
+/* PILLS */
+.sl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin:14px 0 8px}
+.pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:20px;padding:5px 13px;font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.pill.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* SEARCH */
+.sb{position:relative;margin-bottom:8px}
+.sb input{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:10px 14px 10px 38px;font-size:14px;outline:none}
+.sb input:focus{border-color:var(--blue)}
+.sb input::placeholder{color:var(--text3)}
+.sb svg{position:absolute;left:12px;top:50%;margin-top:-8px;color:var(--text2);width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;pointer-events:none}
+.sgr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sgr select, .sgr .fs{background:var(--bg2);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;flex:1;min-width:120px}
+
+/* SCHOOL CARD */
+.scl{display:flex;flex-direction:column;gap:8px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer}
+.sc:active{background:var(--bg3)}
+.sct{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px}
+.scn{font-weight:600;font-size:13px;flex:1;line-height:1.3}
+.badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.b-ok{background:rgba(34,197,94,.15);color:var(--green)}
+.b-no{background:rgba(239,68,68,.15);color:var(--red)}
+.b-att{background:rgba(245,158,11,.15);color:var(--yellow)}
+.b-gr{background:rgba(136,144,176,.1);color:var(--text2)}
+.scm{font-size:11px;color:var(--text2);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.sca{font-size:11px;color:var(--purple)}
+.sdots{display:flex;gap:3px;flex-wrap:wrap;margin-top:8px}
+.sdot{width:14px;height:14px;border-radius:4px}
+.sdot.f{background:var(--green)}
+.sdot.c{background:var(--yellow)}
+.sdot.a{background:var(--blue)}
+.sdot.b{background:var(--orange)}
+.sdot.v{background:var(--bg4);border:1px solid var(--border2)}
+.sdot.r{background:var(--red)}
+.contacted-indicator{display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;margin-left:4px;vertical-align:middle;box-shadow:0 0 2px var(--green);}
+.contacted-time{font-size:8px;color:var(--text3);margin-left:4px;display:inline-block;}
+
+/* URGENTI */
+.uc{background:var(--bg2);border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer}
+.uc:active{background:var(--bg3)}
+.ut{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.un{font-size:13px;font-weight:600;margin-bottom:4px}
+.pr{display:flex;align-items:center;gap:8px;margin-top:8px}
+.prb{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.prf{height:100%;border-radius:2px}
+.prp{font-size:10px;color:var(--text2);min-width:28px;text-align:right}
+
+/* AMBASSADOR */
+.ac{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px}
+.an{font-size:14px;font-weight:700;margin-bottom:10px}
+.as{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ai{font-size:12px;color:var(--text2)}
+.ai strong{color:var(--text)}
+
+/* ALLERTE */
+.alc{background:var(--bg2);border-radius:var(--r);padding:14px;margin-bottom:10px;border-left:3px solid var(--border2)}
+.alc.ts{border-left-color:var(--yellow)}
+.alc.tb{border-left-color:var(--red)}
+.alc.tf{border-left-color:var(--purple)}
+.alc.tn{border-left-color:var(--blue)}
+.alt{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.aln{font-weight:600;font-size:13px;flex:1}
+.altp{font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;text-transform:uppercase}
+.ats{background:rgba(245,158,11,.2);color:var(--yellow)}
+.atb{background:rgba(239,68,68,.2);color:var(--red)}
+.atf{background:rgba(139,92,246,.2);color:var(--purple)}
+.atn{background:rgba(59,130,246,.2);color:var(--blue)}
+.als{font-size:12px;color:var(--text2);margin-bottom:3px}
+.ala{font-size:11px;color:var(--purple);margin-bottom:8px}
+.alm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ald{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px}
+.de{background:rgba(239,68,68,.2);color:var(--red)}
+.du{background:rgba(245,158,11,.2);color:var(--yellow)}
+.do{background:rgba(34,197,94,.15);color:var(--green)}
+.btn-c{background:var(--wa);border:none;border-radius:8px;color:#fff;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;margin-left:auto}
+.btn-c:disabled{background:var(--bg4);color:var(--text3);cursor:default}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(5,7,15,.85);overflow-y:auto;padding:12px}
+.overlay.on{display:flex;align-items:flex-start;justify-content:center}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:600px;margin:auto;overflow:hidden}
+.mh{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px}
+.mt{font-size:16px;font-weight:700;flex:1;line-height:1.3}
+.xb{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mb{padding:16px 18px}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ii{background:var(--bg3);border-radius:8px;padding:10px 12px}
+.il{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.iv{font-size:13px;font-weight:600}
+.str{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 12px;margin-bottom:5px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.str:active{background:var(--bg4)}
+.str.ar{border-color:rgba(245,158,11,.4)}
+.stn{font-size:10px;color:var(--text3);font-weight:600;min-width:20px;flex-shrink:0}
+.sti{flex:1;min-width:0}
+.stnm{font-size:12px;font-weight:500}
+.sts{font-size:10px;color:var(--text2);margin-top:2px}
+.stb{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.sf{background:rgba(34,197,94,.2);color:var(--green)}
+.sc2{background:rgba(245,158,11,.2);color:var(--yellow)}
+.sa{background:rgba(59,130,246,.2);color:var(--blue)}
+.sb2{background:rgba(249,115,22,.2);color:var(--orange)}
+.sv{background:var(--bg4);color:var(--text3);border:1px solid var(--border2)}
+.chv{color:var(--text3);display:flex;flex-shrink:0}
+.chv svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.contacted-badge{background:rgba(34,197,94,.2);color:var(--green);border-radius:12px;padding:2px 6px;font-size:9px;font-weight:600;margin-left:8px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.contacted-badge-full{background:rgba(34,197,94,.15);color:var(--green);border-radius:8px;padding:4px 8px;font-size:10px;margin-top:4px;display:inline-block;}
+
+/* PANEL */
+.panel{position:fixed;inset:0;z-index:200;display:none}
+.panel.on{display:block}
+.pnbg{position:absolute;inset:0;background:rgba(5,7,15,.65)}
+.pnbox{position:absolute;bottom:0;left:0;right:0;background:var(--bg2);border-radius:16px 16px 0 0;border-top:1px solid var(--border2);padding:20px;max-height:88vh;overflow-y:auto;max-width:680px;margin:0 auto}
+.handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+.pnt{font-size:15px;font-weight:700;margin-bottom:4px}
+.pns{font-size:11px;color:var(--text2);margin-bottom:16px}
+label.lb{display:block;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;margin-top:14px}
+.fld{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit}
+.fld:focus{border-color:var(--blue)}
+textarea.fld{resize:none;min-height:70px;line-height:1.5}
+.btn{width:100%;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-p{background:var(--blue);color:#fff}
+.btn-w{background:var(--wa);color:#fff}
+.btn-g{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.wpv{background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.2);border-radius:10px;padding:12px;font-size:12px;color:var(--text);line-height:1.7;margin:10px 0;white-space:pre-wrap;word-break:break-word}
+.nk{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--red);margin:8px 0}
+
+/* TOAST */
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 18px;border-radius:20px;font-size:12px;font-weight:500;z-index:999;pointer-events:none;opacity:0;transition:opacity .25s;max-width:92vw;text-align:center}
+.toast.ok{background:#14532d;border-color:var(--green);color:#86efac}
+.toast.err{background:#450a0a;border-color:var(--red);color:#fca5a5}
+.toast.vis{opacity:1}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--text2);font-size:13px;line-height:1.6}
+.empty-ic{font-size:36px;margin-bottom:10px}
+
+/* SCADENZE */
+.scad-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.scad-filters select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;flex:1;min-width:120px}
+.sk{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.sk-hd{padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.sk-hd:active{background:var(--bg3)}
+.sk-sem{font-size:18px;flex-shrink:0}
+.sk-info{flex:1;min-width:0}
+.sk-nome{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.sk-prog{flex-shrink:0;text-align:right}
+.sk-pct{font-size:11px;font-weight:700;color:var(--text2)}
+.sk-bar{width:48px;height:4px;background:var(--bg4);border-radius:2px;margin-top:4px;overflow:hidden}
+.sk-barf{height:100%;border-radius:2px;background:var(--green)}
+.sk-chv{color:var(--text3);transition:transform .2s;flex-shrink:0}
+.sk-chv svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.sk.open .sk-chv{transform:rotate(90deg)}
+.sk-steps{display:none;border-top:1px solid var(--border)}
+.sk.open .sk-steps{display:block}
+.sk-step{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px}
+.sk-step:last-child{border-bottom:none}
+.sk-step-dot{font-size:13px;flex-shrink:0}
+.sk-step-nm{flex:1;color:var(--text)}
+.sk-step-stato{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;flex-shrink:0}
+.sk-step-d{font-size:10px;font-weight:700;flex-shrink:0;min-width:52px;text-align:right}
+.sd-sc{color:var(--red)}.sd-ur{color:var(--yellow)}.sd-is{color:#f97316}.sd-ok{color:var(--green)}.sd-no{color:var(--text3)}
+.sgrav-sec{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:14px;margin-top:16px}
+.sgrav-t{font-size:12px;font-weight:700;color:var(--red);margin-bottom:10px}
+.sgrav-row{background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:12px}
+.sgrav-amb{font-size:11px;color:var(--purple);font-weight:600;margin-bottom:4px}
+.sgrav-item{color:var(--text2);margin-top:2px}
+
+/* CONTATTATI */
+.ctc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.ctcf{flex:1;min-width:0}
+.ctcn{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctcs{font-size:11px;color:var(--text2);margin-top:2px}
+.ctcd{font-size:10px;color:var(--green);font-weight:600;flex-shrink:0;white-space:nowrap}
+.ct-ic{color:var(--green);font-size:14px;flex-shrink:0}
+
+/* SETTINGS */
+.sst{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.sst-t{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.sw{margin-bottom:10px}
+.sw label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px}
+.sf2{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit}
+.dbg{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px;font-size:11px;color:var(--text2);font-family:monospace;line-height:1.6;margin-top:10px;max-height:160px;overflow-y:auto;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HOME -->
+<div class="page on" id="pg-home">
+  <div class="ph">
+    <div><div class="pt">Panoramica</div><div class="ps" id="hdate"></div></div>
+    <div class="hbs">
+      <button class="ib" onclick="doRefresh(this)" title="Aggiorna">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="ib" onclick="goPage('set',document.querySelectorAll('.nb')[4])" title="Impostazioni">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="bn loading" id="conn"><div class="dot bl"></div><div class="btx" id="ctxt">Connessione...</div></div>
+  <div class="kg">
+    <div class="kc tot"><div class="kl">Totali</div><div class="kv" id="k-tot">—</div><div class="ks" id="k-tots"></div><div class="kln"></div></div>
+    <div class="kc ok"><div class="kl">Accettate</div><div class="kv" id="k-ok">—</div><div class="ks" id="k-oks"></div><div class="kln"></div></div>
+    <div class="kc att"><div class="kl">In contatto</div><div class="kv" id="k-att">—</div><div class="ks"></div><div class="kln"></div></div>
+    <div class="kc no"><div class="kl">Rifiutate</div><div class="kv" id="k-no">—</div><div class="ks"></div><div class="kln"></div></div>
+  </div>
+  <div id="rem-wrap" style="display:none">
+    <div class="rb">
+      <div class="rt">⚠ Scadenze urgenti (<span id="rem-cnt">0</span>)
+        <button class="rwb" style="margin-left:auto" onclick="sendAll()" id="rba">Invia tutti</button>
+      </div>
+      <div id="rl"></div>
+    </div>
+  </div>
+  <div class="sl">Attività recenti</div>
+  <div class="pills" id="hpills">
+    <button class="pill on" onclick="setHF('tutti',this)">Tutti</button>
+    <button class="pill" onclick="setHF('ok',this)">Accettate</button>
+    <button class="pill" onclick="setHF('att',this)">In contatto</button>
+    <button class="pill" onclick="setHF('no',this)">Rifiutate</button>
+  </div>
+  <div class="scl" id="hl"></div>
+</div>
+
+<!-- SCUOLE -->
+<div class="page" id="pg-scuole">
+  <div class="ph"><div><div class="pt">Scuole</div><div class="ps" id="scc">—</div></div></div>
+  <div class="sb">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" placeholder="Cerca scuola, comune, ambassador..." oninput="renderScuole()" id="scq">
+  </div>
+  <div class="sgr">
+    <select class="fs" onchange="renderScuole()" id="scfs">
+      <option value="">Tutti gli status</option>
+      <option>COLLAB ACCETTATA</option>
+      <option>COLLAB RIFIUTATA</option>
+      <option>IN CONTATTO CON IL RAPPR</option>
+      <option>CALL FATTA IN ATTESA DI CONFERMA</option>
+      <option>NO CONTATTO</option>
+    </select>
+    <select class="fs" onchange="renderScuole()" id="scfa"><option value="">Tutti ambassador</option></select>
+    <select class="fs" onchange="renderScuole()" id="scstep">
+      <option value="">Tutti gli step</option>
+      <option value="1">Step 1: Call con Rappr Ist</option>
+      <option value="2">Step 2: Gruppo WA</option>
+      <option value="3">Step 3: Stories IG</option>
+      <option value="4">Step 4: Reel WOW</option>
+      <option value="5">Step 5: Gruppo WA 4-5</option>
+      <option value="6">Step 6: Call Rappr 4/5</option>
+      <option value="7">Step 7: IG Stories</option>
+      <option value="8">Step 8: IG Post Recap</option>
+      <option value="9">Step 9: Consegnato Digitale</option>
+      <option value="10">Step 10: IG Storia Hype</option>
+      <option value="11">Step 11: QR Digitale</option>
+      <option value="12">Step 12: Post IG Reel</option>
+      <option value="13">Step 13: Stories IG QR</option>
+    </select>
+  </div>
+  <div class="scl" id="scl"></div>
+</div>
+
+<!-- ALLERTE -->
+<div class="page" id="pg-allerte">
+  <div class="ph"><div><div class="pt">Allerte</div><div class="ps">step urgenti e blocchi</div></div></div>
+  <div class="pills" id="apills">
+    <button class="pill on" onclick="setAF('tutti',this)">Tutti</button>
+    <button class="pill" onclick="setAF('scadenza',this)">Scadenza</button>
+    <button class="pill" onclick="setAF('blocco',this)">Blocco</button>
+    <button class="pill" onclick="setAF('fermo',this)">Fermi</button>
+    <button class="pill" onclick="setAF('nuovo',this)">Da iniziare</button>
+  </div>
+  <div id="al"></div>
+</div>
+
+<!-- URGENTI -->
+<div class="page" id="pg-urgenti">
+  <div class="ph"><div><div class="pt">Urgenti</div><div class="ps">scuole con step arretrati</div></div></div>
+  <div id="ul"></div>
+</div>
+
+<!-- AMBASSADOR -->
+<div class="page" id="pg-amb">
+  <div class="ph"><div><div class="pt">Ambassador</div><div class="ps">performance per agente</div></div></div>
+  <div id="ambl"></div>
+</div>
+
+<!-- SCADENZE -->
+<div class="page" id="pg-scadenze">
+  <div class="ph"><div><div class="pt">Scadenze</div><div class="ps" id="scad-sub">—</div></div></div>
+  <div class="scad-filters">
+    <select id="sf-amb" onchange="renderScadenze()"><option value="">Tutti ambassador</option></select>
+    <select id="sf-stato" onchange="renderScadenze()">
+      <option value="">Tutti gli stati</option>
+      <option value="DA FARE">Da fare</option>
+      <option value="IN CORSO">In corso</option>
+      <option value="IN ATTESA">In attesa</option>
+      <option value="BLOCCO">Blocco</option>
+    </select>
+    <select id="sf-urg" onchange="renderScadenze()">
+      <option value="tutti">Tutte le scadenze</option>
+      <option value="scaduto">Solo scaduti 🔴</option>
+      <option value="urgente">Solo urgenti 🟠</option>
+      <option value="inscadenza">In scadenza 🟡</option>
+    </select>
+  </div>
+  <div id="scad-list"></div>
+  <div id="sgrav-list"></div>
+</div>
+
+<!-- CONTATTATI -->
+<div class="page" id="pg-contattati">
+  <div class="ph">
+    <div><div class="pt">Contattati</div><div class="ps">ultimi 72 ore</div></div>
+    <button class="ib" onclick="clearContattati()" title="Svuota lista">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </button>
+  </div>
+  <div id="contattati-list"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="pg-set">
+  <div class="ph"><div><div class="pt">Impostazioni</div></div></div>
+  <div class="sst">
+    <div class="sst-t">Connessione Zoho</div>
+    <div class="sw"><label>Worker URL</label><input class="sf2" id="sw1" placeholder="https://...workers.dev"></div>
+    <div class="sw"><label>Modulo CRM</label><input class="sf2" id="sw2" placeholder="SCUOLE"></div>
+    <div class="sw"><label>Giorni allerta scadenza</label><input class="sf2" id="sw3" type="number" min="1" max="14"></div>
+  </div>
+  <div class="sst">
+    <div class="sst-t">Callbell WhatsApp</div>
+    <div class="sw"><label>API Key (opzionale — usa quella del Worker)</label><input class="sf2" id="sw4" placeholder="Bearer ..."></div>
+    <div class="sw"><label>Channel UUID</label><input class="sf2" id="sw5"></div>
+    <div class="sw"><label>Template UUID — Reminder scadenza</label><input class="sf2" id="sw6" placeholder="ee99b488453847588a06f31dc6761b01"></div>
+    <div class="sw"><label>Template UUID — Blocco step</label><input class="sf2" id="sw7" placeholder="lascia vuoto = usa Reminder"></div>
+    <div class="sw"><label>Template UUID — Chiedi aggiornamento</label><input class="sf2" id="sw8" placeholder="lascia vuoto = usa Reminder"></div>
+    <div class="sw"><label>Template UUID — Sollecito inizio</label><input class="sf2" id="sw9" placeholder="lascia vuoto = usa Reminder"></div>
+  </div>
+  <button class="btn btn-p" onclick="saveSettings()">💾 Salva impostazioni</button>
+  <button class="btn btn-g" style="margin-top:8px" onclick="testConn()">🔌 Test connessione</button>
+  <div class="dbg" id="dbg">Log debug...</div>
+</div>
+
+</div><!-- /app -->
+
+<!-- NAV -->
+<nav>
+  <button class="nb on" onclick="goPage('home',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+  </button>
+  <button class="nb" onclick="goPage('scuole',this)">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Scuole
+  </button>
+  <button class="nb" onclick="goPage('allerte',this)">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Allerte
+    <span class="nbadge" id="ab"></span>
+  </button>
+  <button class="nb" onclick="goPage('urgenti',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Urgenti
+    <span class="nbadge" id="ub"></span>
+  </button>
+  <button class="nb" onclick="goPage('amb',this)">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Amb.
+  </button>
+  <button class="nb" onclick="goPage('scadenze',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Scad.
+    <span class="nbadge" id="scadb"></span>
+  </button>
+  <button class="nb" onclick="goPage('contattati',this)">
+    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.45 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>📞
+    <span class="nbadge" id="ctb"></span>
+  </button>
+</nav>
+
+<!-- MODAL DETTAGLIO SCUOLA -->
+<div class="overlay" id="mo">
+  <div class="modal">
+    <div class="mh">
+      <div>
+        <div class="mt" id="mo-name"></div>
+        <div style="margin-top:6px" id="mo-badge"></div>
+      </div>
+      <button class="xb" onclick="closeMo()">✕</button>
+    </div>
+    <div class="mb">
+      <div class="ig" id="mo-info"></div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">I 13 step</div>
+      <div id="mo-steps"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL STEP EDIT -->
+<div class="panel" id="pn-step">
+  <div class="pnbg" onclick="closePanel('pn-step')"></div>
+  <div class="pnbox">
+    <div class="handle"></div>
+    <div class="pnt" id="pnt">Step</div>
+    <div class="pns" id="pns"></div>
+    <label class="lb">Stato</label>
+    <select class="fld" id="pstato">
+      <option>DA FARE</option>
+      <option>IN CORSO</option>
+      <option>IN ATTESA</option>
+      <option>FATTO</option>
+      <option>BLOCCO</option>
+    </select>
+    <label class="lb">Scadenza</label>
+    <input class="fld" type="date" id="pscad">
+    <label class="lb">Note</label>
+    <textarea class="fld" id="pnote" rows="3" placeholder="Note opzionali..."></textarea>
+    <button class="btn btn-w" onclick="openWaFromStep()" id="pnwa">📲 Contatta WhatsApp</button>
+    <button class="btn btn-p" onclick="saveStep()" id="pnsave">💾 Salva su Zoho</button>
+    <button class="btn btn-g" onclick="closePanel('pn-step')">Annulla</button>
+  </div>
+</div>
+
+<!-- PANEL WA -->
+<div class="panel" id="pn-wa">
+  <div class="pnbg" onclick="closePanel('pn-wa')"></div>
+  <div class="pnbox">
+    <div class="handle"></div>
+    <div class="pnt">📲 Invia WhatsApp</div>
+    <div class="pns" id="wa-sub"></div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px" id="wa-info"></div>
+    <div class="nk" id="wa-nk" style="display:none">⚠ Nessuna API Key — configura CALLBELL_API_KEY nel Worker Cloudflare</div>
+    <label class="lb">Tipo messaggio</label>
+    <select class="fld" id="wa-tipo" onchange="updateWaPrev()">
+      <option value="reminder">Reminder scadenza</option>
+      <option value="blocco">Risolvi blocco</option>
+      <option value="update">Chiedi aggiornamento</option>
+      <option value="inizio">Inizia collaborazione</option>
+    </select>
+    <label class="lb">Numero WhatsApp</label>
+    <input class="fld" id="wa-phone" placeholder="+39...">
+    <label class="lb">Anteprima messaggio</label>
+    <div class="wpv" id="wa-prev"></div>
+    <div id="wa-cw" style="display:none">
+      <label class="lb">Messaggio personalizzato</label>
+      <textarea class="fld" id="wa-ct" rows="4" oninput="updateWaPrev()"></textarea>
+    </div>
+    <button class="btn btn-w" onclick="doSendWA()" id="wa-btn">Invia ora 📨</button>
+    <button class="btn btn-g" onclick="closePanel('pn-wa')">Annulla</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════
+var CFG = {
+  worker:  'https://snowy-frost-95c3.gretab-invibe.workers.dev',
+  module:  'SCUOLE',
+  days:    3,
+  cbKey:   '',
+  cbCh:    '4f619a9bc43c4083a606578ad1a53f5d',
+  cbTpl:         'ee99b488453847588a06f31dc6761b01',
+  cbTplBlocco:   '',
+  cbTplUpdate:   '',
+  cbTplInizio:   ''
+};
+
+(function(){
+  try{ var s=localStorage.getItem('crm6_cfg'); if(s){ var p=JSON.parse(s); for(var k in p) CFG[k]=p[k]; } }catch(e){}
+})();
+
+function saveSettings(){
+  CFG.worker = document.getElementById('sw1').value.trim() || CFG.worker;
+  CFG.module = document.getElementById('sw2').value.trim() || CFG.module;
+  CFG.days   = parseInt(document.getElementById('sw3').value) || 3;
+  CFG.cbKey  = document.getElementById('sw4').value.trim();
+  CFG.cbCh   = document.getElementById('sw5').value.trim() || CFG.cbCh;
+  CFG.cbTpl        = document.getElementById('sw6').value.trim() || CFG.cbTpl;
+  var _s7 = document.getElementById('sw7'); if(_s7) CFG.cbTplBlocco = _s7.value.trim();
+  var _s8 = document.getElementById('sw8'); if(_s8) CFG.cbTplUpdate = _s8.value.trim();
+  var _s9 = document.getElementById('sw9'); if(_s9) CFG.cbTplInizio = _s9.value.trim();
+  try{ localStorage.setItem('crm6_cfg', JSON.stringify(CFG)); }catch(e){}
+  toast('Salvato ✓','ok');
+}
+function fillSettings(){
+  document.getElementById('sw1').value = CFG.worker;
+  document.getElementById('sw2').value = CFG.module;
+  document.getElementById('sw3').value = CFG.days;
+  document.getElementById('sw4').value = CFG.cbKey;
+  document.getElementById('sw5').value = CFG.cbCh;
+  document.getElementById('sw6').value = CFG.cbTpl;
+  var _f7 = document.getElementById('sw7'); if(_f7) _f7.value = CFG.cbTplBlocco||'';
+  var _f8 = document.getElementById('sw8'); if(_f8) _f8.value = CFG.cbTplUpdate||'';
+  var _f9 = document.getElementById('sw9'); if(_f9) _f9.value = CFG.cbTplInizio||'';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// STEPS — API names esatti (con underscore)
+// ═══════════════════════════════════════════════════════════════════
+var STEPS = [
+  {id:1,  nm:'Call con Rappr Ist',   zS:'CALL_CON_I_RAPPRIST_STATO',        zD:'Scadenza_Step_1',  zN:'STEP_1_NOTE'},
+  {id:2,  nm:'Gruppo WA',            zS:'GRUPPO_WA_STATO',                  zD:'Scadenza_Step_2',  zN:'STEP_2_NOTE'},
+  {id:3,  nm:'Stories IG',           zS:'STORIES_IG_STATO',                 zD:'Scadenza_Step_3',  zN:'STEP_3_NOTE'},
+  {id:4,  nm:'Reel WOW',             zS:'REEL_WOW_STATO',                   zD:'Scadenza_Step_4',  zN:'STEP_4_NOTE'},
+  {id:5,  nm:'Gruppo WA 4-5',        zS:'GRUPPO_WA_4_5_STATO',              zD:'Scadenza_Step_5',  zN:'STEP_5_NOTE'},
+  {id:6,  nm:'Call Rappr 4/5',       zS:'CALL_RAPPR_4_5_STATO',             zD:'Scadenza_Step_6',  zN:'STEP_6_NOTE'},
+  {id:7,  nm:'IG Stories',           zS:'IG_STORIES_STATO',                 zD:'Scadenza_Step_7',  zN:'STEP_7_NOTE'},
+  {id:8,  nm:'IG Post Recap',        zS:'IG_POST_RECAP_STATO',              zD:'Scadenza_Step_8',  zN:'STEP_8_NOTE'},
+  {id:9,  nm:'Consegnato Digitale',  zS:'CONSEGNATO_DIGITALE_STATO',        zD:'Scadenza_Step_9',  zN:'STEP_9_NOTE'},
+  {id:10, nm:'IG Storia Hype',       zS:'IG_STORIA_HYPE_BUONI_STATO',       zD:'Scadenza_Step_10', zN:'STEP_10_NOTE'},
+  {id:11, nm:'QR Digitale',          zS:'QR_DIGITALE_LINK',                 zD:'Scadenza_Step_11', zN:'STEP_11_NOTE'},
+  {id:12, nm:'Post IG Reel',         zS:'POST_IG_REEL_INFO_ESTATE',         zD:'Scadenza_Step_12', zN:'STEP_12_NOTE'},
+  {id:13, nm:'Stories IG QR',        zS:'STORIES_IG_CON_QR_DIGITALE',       zD:'Scadenza_Step_13', zN:'STEP_13_NOTE'}
+];
+
+var ZOHO_BASE = 'Name,Status_Scuola,Nome_sottoreferente,Tel_sottoreferente,Nome_referente,Tel_referente,Comune,Regione,Numero_studenti,Provincia';
+var ZOHO_STEPS = STEPS.map(function(s){ return [s.zS, s.zD, s.zN].join(','); }).join(',');
+var ZOHO_FIELDS = ZOHO_BASE + ',' + ZOHO_STEPS;
+
+// ═══════════════════════════════════════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════════════════════════════════════
+function normalizeStato(v) {
+  if (!v) return 'DA FARE';
+  var u = String(v).trim();
+  if (u === 'DA_FARE') return 'DA FARE';
+  if (u === 'IN_CORSO') return 'IN CORSO';
+  if (u === 'IN_ATTESA') return 'IN ATTESA';
+  if (u === 'FATTO') return 'FATTO';
+  if (u === 'BLOCCO') return 'BLOCCO';
+  if (u === 'DA FARE') return 'DA FARE';
+  if (u === 'IN CORSO') return 'IN CORSO';
+  if (u === 'IN ATTESA') return 'IN ATTESA';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(u) || /^\d{4}-\d{2}-\d{2}/.test(u)) return 'FATTO';
+  return 'DA FARE';
+}
+
+function getStepDotClass(stato, scadenzaStr) {
+  if (stato === 'FATTO') return 'f';
+  if (scadenzaStr) {
+    var today = new Date(); today.setHours(0,0,0,0);
+    var scadDate = new Date(scadenzaStr);
+    if (!isNaN(scadDate.getTime())) {
+      scadDate.setHours(0,0,0,0);
+      if (scadDate < today) return 'r';
+    }
+  }
+  if (stato === 'IN CORSO') return 'c';
+  if (stato === 'IN ATTESA') return 'a';
+  if (stato === 'BLOCCO') return 'b';
+  return 'v';
+}
+
+function getStepBadgeClass(stato) {
+  if (stato === 'FATTO') return 'sf';
+  if (stato === 'IN CORSO') return 'sc2';
+  if (stato === 'IN ATTESA') return 'sa';
+  if (stato === 'BLOCCO') return 'sb2';
+  return 'sv';
+}
+
+function fromZoho(r) {
+  return {
+    id:        r.id,
+    nome:      r.Name || '',
+    status:    r.Status_Scuola || '',
+    ambassador:r.Nome_sottoreferente || '',
+    tel_amb:   normalizePhone(r.Tel_sottoreferente),
+    referente: r.Nome_referente || '',
+    tel_ref:   String(r.Tel_referente || '').replace(/\s/g,''),
+    comune:    r.Comune || '',
+    regione:   r.Regione || '',
+    provincia: r.Provincia || '',
+    studenti:  r.Numero_studenti || '',
+    steps: STEPS.map(function(st){
+      return {
+        stato: normalizeStato(r[st.zS]),
+        scad:  r[st.zD] || null,
+        note:  r[st.zN] || ''
+      };
+    })
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONTATTATI con timestamp completo
+// ═══════════════════════════════════════════════════════════════════
+function markContacted(schoolId, stepKey) {
+  try {
+    var data = JSON.parse(localStorage.getItem('crm_contacted') || '{}');
+    var key = 'ct_' + schoolId + '_' + stepKey;
+    data[key] = { ts: Date.now(), schoolId: schoolId, stepKey: stepKey };
+    localStorage.setItem('crm_contacted', JSON.stringify(data));
+  } catch(e) {}
+  updateCtBadge();
+}
+
+// Restituisce { contacted: bool, timestamp: number/null }
+function getContactInfo(schoolId, stepKey) {
+  try {
+    var data = JSON.parse(localStorage.getItem('crm_contacted') || '{}');
+    var entry = data['ct_' + schoolId + '_' + stepKey];
+    if (!entry) return { contacted: false, timestamp: null };
+    var ts = entry.ts;
+    if ((Date.now() - ts) < 72 * 3600 * 1000) {
+      return { contacted: true, timestamp: ts };
+    }
+    return { contacted: false, timestamp: null };
+  } catch(e) { return { contacted: false, timestamp: null }; }
+}
+
+function isContacted(schoolId, stepKey) {
+  return getContactInfo(schoolId, stepKey).contacted;
+}
+
+function getContactTimestamp(schoolId, stepKey) {
+  return getContactInfo(schoolId, stepKey).timestamp;
+}
+
+// Formatta data/ora relativa (es. "Oggi 14:30", "Ieri 09:15", "2gg fa 10:00")
+function formatRelativeTime(ts) {
+  if (!ts) return '';
+  var now = Date.now();
+  var diff = now - ts;
+  var seconds = Math.floor(diff / 1000);
+  var minutes = Math.floor(seconds / 60);
+  var hours = Math.floor(minutes / 60);
+  var days = Math.floor(hours / 24);
+  
+  var date = new Date(ts);
+  var timeStr = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  
+  if (days === 0) return 'Oggi ' + timeStr;
+  if (days === 1) return 'Ieri ' + timeStr;
+  return days + 'gg fa ' + timeStr;
+}
+
+function formatFullDateTime(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  return d.toLocaleDateString('it-IT') + ' ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+var SCHOOLS = [];
+var syncing = false;
+var curPage = 'home';
+var hFilt = 'tutti';
+var aFilt = 'tutti';
+var _allerte = [];
+var _rem = [];
+var CS = null;
+var CSI = null;
+var _cwa = null;
+
+// ═══════════════════════════════════════════════════════════════════
+// API (invariata)
+// ═══════════════════════════════════════════════════════════════════
+function dbg(m){ var el=document.getElementById('dbg'); if(el) el.textContent = new Date().toLocaleTimeString()+' '+m+'\n'+el.textContent.substring(0,500); }
+
+function setConn(st, m){
+  var b=document.getElementById('conn'),d=b.querySelector('.dot'),t=document.getElementById('ctxt');
+  b.className='bn '+st;
+  d.className='dot'+(st!=='ok'?' bl':'');
+  t.textContent=m;
+}
+
+function fetchSchools(){
+  if(syncing) return;
+  syncing=true;
+  setConn('loading','Connessione a Zoho CRM...');
+  var all=[], page=1;
+  function go(){
+    var url=CFG.worker+'/zoho/'+CFG.module+'?fields='+encodeURIComponent(ZOHO_FIELDS)+'&per_page=200&page='+page;
+    dbg('GET p'+page);
+    var xhr=new XMLHttpRequest();
+    xhr.open('GET',url,true);
+    xhr.onreadystatechange=function(){
+      if(xhr.readyState!==4) return;
+      dbg('HTTP '+xhr.status+': '+xhr.responseText.substring(0,80));
+      if(xhr.status<200||xhr.status>=300){
+        setConn('err','Errore '+xhr.status+' — riprova tra qualche minuto');
+        syncing=false;
+        renderAll();
+        return;
+      }
+      try{
+        var d=JSON.parse(xhr.responseText);
+        var rs=d.data||[];
+        all=all.concat(rs.map(fromZoho));
+        if(d.info&&d.info.more_records&&rs.length===200){ page++; go(); return; }
+        SCHOOLS=all;
+        var t=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+        setConn('ok',SCHOOLS.length+' scuole LIVE · '+t);
+        syncing=false;
+        renderAll();
+      }catch(e){
+        setConn('err','Errore parsing: '+e.message);
+        dbg('ERR: '+e.message);
+        syncing=false;
+        renderAll();
+      }
+    };
+    xhr.send();
+  }
+  go();
+}
+
+function patchSchool(id, fields, cb){
+  var url=CFG.worker+'/zoho/'+CFG.module+'/'+id;
+  var xhr=new XMLHttpRequest();
+  xhr.open('PUT',url,true);
+  xhr.setRequestHeader('Content-Type','application/json');
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4) return;
+    if(xhr.status>=200&&xhr.status<300) cb(null);
+    else cb(new Error('HTTP '+xhr.status));
+  };
+  xhr.send(JSON.stringify({data:[{id:id, ...fields}]}));
+}
+
+function testConn(){
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET',CFG.worker+'/zoho/'+CFG.module+'?per_page=1',true);
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4) return;
+    dbg('TEST '+xhr.status+': '+xhr.responseText.substring(0,120));
+    if(xhr.status>=200&&xhr.status<300) toast('Connessione OK ✓','ok');
+    else toast('Errore '+xhr.status,'err');
+  };
+  xhr.send();
+}
+
+function removeContacted(key) {
+  try {
+    var data = JSON.parse(localStorage.getItem('crm_contacted') || '{}');
+    delete data[key];
+    localStorage.setItem('crm_contacted', JSON.stringify(data));
+  } catch(e) {}
+  updateCtBadge();
+  renderContattati();
+}
+
+function clearContattati() {
+  try { localStorage.removeItem('crm_contacted'); } catch(e) {}
+  updateCtBadge();
+  renderContattati();
+}
+
+function updateCtBadge() {
+  try {
+    var data = JSON.parse(localStorage.getItem('crm_contacted') || '{}');
+    var n = Object.values(data).filter(function(e){ return (Date.now() - e.ts) < 72*3600*1000; }).length;
+    var b = document.getElementById('ctb');
+    if (b) { b.textContent = n; b.style.display = n ? '' : 'none'; }
+  } catch(e) {}
+}
+
+function renderContattati() {
+  var el = document.getElementById('contattati-list');
+  if (!el) return;
+  try {
+    var data = JSON.parse(localStorage.getItem('crm_contacted') || '{}');
+    var now = Date.now();
+    var entries = Object.values(data).filter(function(e){ return (now - e.ts) < 72*3600*1000; });
+    entries.sort(function(a,b){ return b.ts - a.ts; });
+    if (!entries.length) { el.innerHTML = empty('Nessun contatto nelle ultime 72 ore'); return; }
+    el.innerHTML = entries.map(function(e) {
+      var s = SCHOOLS.find(function(x){ return String(x.id) === String(e.schoolId); });
+      var nome = s ? s.nome : 'Scuola #'+e.schoolId;
+      var amb  = s ? s.ambassador : '';
+      var step = STEPS.find(function(st){ return st.zS === e.stepKey; });
+      var stepNm = step ? step.nm : e.stepKey;
+      var timeStr = formatFullDateTime(e.ts);
+      var agoStr = formatRelativeTime(e.ts);
+      var storageKey = JSON.stringify('ct_' + e.schoolId + '_' + e.stepKey);
+      return "<div class='ctc'><div class='ct-ic'>📞</div><div class='ctcf'><div class='ctcn'>"+nome+"</div><div class='ctcs'>"+stepNm+(amb?' · '+amb:'')+"</div></div><div class='ctcd'>"+agoStr+"</div><button onclick='removeContacted("+storageKey+")' style='background:none;border:1px solid var(--border2);color:var(--text3);border-radius:6px;padding:4px 8px;font-size:10px;cursor:pointer;margin-left:6px;flex-shrink:0'>Rimuovi</button></div>";
+    }).join('');
+  } catch(e) { el.innerHTML = empty('Errore lettura dati'); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CALLBELL
+// ═══════════════════════════════════════════════════════════════════
+function normalizePhone(phone){
+  var ph = String(phone||'').replace(/[^\d+]/g,'');
+  if(/^39\d{9,}$/.test(ph)) ph = '+'+ph;
+  else if(ph && !ph.startsWith('+')) ph = '+39'+ph;
+  return ph;
+}
+
+function sendWA(phone, placeholders, cb, msgText, tplType){
+  var ph = normalizePhone(phone);
+  if (!CFG.cbCh) { toast('❌ Channel UUID mancante', 'err'); cb(false, 0); return; }
+  if (!CFG.cbTpl) { toast('❌ Template UUID mancante', 'err'); cb(false, 0); return; }
+  var cleanValues = (Array.isArray(placeholders) ? placeholders : []).map(function(v){
+    return String(v == null ? '' : v).trim();
+  });
+  var lastReply = null;
+  try {
+    var raw = localStorage.getItem('lastReply_' + ph);
+    var parsed = raw ? parseInt(raw, 10) : NaN;
+    if (!isNaN(parsed) && parsed > 0) lastReply = parsed;
+  } catch(e) {}
+  var useText = lastReply !== null && (Date.now() - lastReply) < 24 * 3600 * 1000;
+  var payload;
+  if (useText) {
+    payload = {
+      to:      ph,
+      from:    'whatsapp',
+      type:    'text',
+      content: { text: msgText || cleanValues.join('\n') }
+    };
+  } else {
+    payload = {
+      to:              ph,
+      from:            'whatsapp',
+      type:            'text',
+      channel_uuid:    CFG.cbCh,
+      template_uuid:   (tplType==='blocco'&&CFG.cbTplBlocco?CFG.cbTplBlocco:tplType==='update'&&CFG.cbTplUpdate?CFG.cbTplUpdate:tplType==='inizio'&&CFG.cbTplInizio?CFG.cbTplInizio:CFG.cbTpl),
+      template_values: cleanValues,
+      optin_contact:   true,
+      content:         { text: cleanValues.join(' ') }
+    };
+  }
+  var headers = { 'Content-Type': 'application/json' };
+  if (CFG.cbKey) {
+    var authVal = CFG.cbKey.startsWith('Bearer ') ? CFG.cbKey : 'Bearer ' + CFG.cbKey;
+    headers['Authorization'] = authVal;
+  }
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', CFG.worker + '/callbell/send', true);
+  for (var k in headers) xhr.setRequestHeader(k, headers[k]);
+  xhr.onreadystatechange = function(){
+    if (xhr.readyState !== 4) return;
+    dbg('[sendWA] HTTP ' + xhr.status + ': ' + xhr.responseText.substring(0, 200));
+    cb(xhr.status >= 200 && xhr.status < 300, xhr.status);
+  };
+  xhr.send(JSON.stringify(payload));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function sc(s){
+  if(!s) return 'none';
+  var u=s.toUpperCase();
+  if(u.indexOf('ACCETTATA')>=0) return 'ok';
+  if(u.indexOf('RIFIUTATA')>=0) return 'no';
+  if(u.indexOf('CONTATTO')>=0||u.indexOf('CALL FATTA')>=0) return 'att';
+  return 'none';
+}
+function badgeH(s){
+  var c=sc(s), cl=c==='ok'?'b-ok':c==='no'?'b-no':c==='att'?'b-att':'b-gr';
+  var lbl=s||'Nessuno'; if(lbl.length>20) lbl=lbl.substring(0,18)+'..';
+  return "<span class='badge "+cl+"'>"+lbl+"</span>";
+}
+function nFatto(sc){ return sc.steps.filter(function(s){return s.stato==='FATTO';}).length; }
+function dLeft(d){
+  if(!d) return null;
+  var dt=new Date(d); if(isNaN(dt)) return null;
+  var n=new Date(); n.setHours(0,0,0,0); dt.setHours(0,0,0,0);
+  return Math.ceil((dt-n)/86400000);
+}
+function txt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+
+function getCurrentStep(school) {
+  for (var i=0; i<school.steps.length; i++) {
+    if (school.steps[i].stato !== 'FATTO') return i;
+  }
+  return -1;
+}
+
+function sCard(s){
+  var comp=nFatto(s), c=sc(s.status);
+  var cls=c==='ok'?'b-ok':c==='no'?'b-no':c==='att'?'b-att':'b-gr';
+  var ss=s.status.replace('COLLAB ',''); if(ss.length>16) ss=ss.substring(0,15)+'..';
+  var dots = s.steps.map(function(st, idx){
+    var dotClass = getStepDotClass(st.stato, st.scad);
+    var info = getContactInfo(s.id, STEPS[idx].zS);
+    var contactedMark = info.contacted ? "<span class='contacted-indicator' title='Contattato "+formatRelativeTime(info.timestamp)+"'></span>" : "";
+    var timeSpan = info.contacted ? "<span class='contacted-time'>"+formatRelativeTime(info.timestamp)+"</span>" : "";
+    return "<div style='display:inline-flex;align-items:center;margin-right:4px;'><div class='sdot "+dotClass+"'></div>"+contactedMark+timeSpan+"</div>";
+  }).join('');
+  return "<div class='sc' onclick='openSch(\""+s.id+"\")'><div class='sct'><div class='scn'>"+s.nome+"</div><span class='badge "+cls+"'>"+ss+"</span></div><div class='scm'>"+(s.comune?"<span>"+s.comune+"</span>":"")+(s.provincia?"<span>"+s.provincia+"</span>":"")+(s.studenti?"<span>"+s.studenti+" st.</span>":"")+"</div>"+(s.ambassador?"<div class='sca'>👤 "+s.ambassador+"</div>":"")+"<div class='sdots'>"+dots+"</div></div>";
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER HOME
+// ═══════════════════════════════════════════════════════════════════
+function renderHome(){
+  var tot=SCHOOLS.length, ok=0, att=0, no=0, dn=0;
+  for(var i=0;i<SCHOOLS.length;i++){
+    var c=sc(SCHOOLS[i].status);
+    if(c==='ok') ok++;
+    if(c==='att') att++;
+    if(c==='no') no++;
+    dn+=nFatto(SCHOOLS[i]);
+  }
+  txt('k-tot',tot); txt('k-ok',ok); txt('k-att',att); txt('k-no',no);
+  txt('k-tots',tot?Math.round(ok/tot*100)+'% acc.':'');
+  txt('k-oks',tot*13?Math.round(dn/(tot*13)*100)+'% step ok':'');
+
+  var urg=SCHOOLS.filter(function(s){ return sc(s.status)==='ok'&&nFatto(s)<13; }).length;
+  var ub=document.getElementById('ub');
+  if(urg>0){ub.style.display='';ub.textContent=urg;}else ub.style.display='none';
+
+  renderRem(); renderHL();
+}
+
+function setHF(f,el){
+  hFilt=f;
+  document.querySelectorAll('#hpills .pill').forEach(function(b){b.classList.remove('on');});
+  if(el) el.classList.add('on');
+  renderHL();
+}
+function renderHL(){
+  var list=SCHOOLS.filter(function(s){ var c=sc(s.status); return hFilt==='tutti'||hFilt===c; }).slice(0,40);
+  document.getElementById('hl').innerHTML=list.length?list.map(sCard).join(''):empty('Nessuna scuola');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER REMINDERS
+// ═══════════════════════════════════════════════════════════════════
+function renderRem(){
+  _rem=[];
+  for(var si=0;si<SCHOOLS.length;si++){
+    var s=SCHOOLS[si];
+    if(sc(s.status)==='no') continue;
+    for(var ti=0;ti<STEPS.length;ti++){
+      var st=s.steps[ti];
+      if(st.stato==='FATTO') continue;
+      if(!st.scad) continue;
+      var d=dLeft(st.scad);
+      if(d===null||d>CFG.days) continue;
+      _rem.push({s:s,si:si,ti:ti,d:d});
+    }
+  }
+  _rem.sort(function(a,b){return a.d-b.d;});
+
+  var wrap=document.getElementById('rem-wrap');
+  if(!_rem.length){wrap.style.display='none';return;}
+  wrap.style.display='';
+  txt('rem-cnt',_rem.length);
+
+  var remFresh=[], remDone=[];
+  _rem.forEach(function(r,i){ (isContacted(r.s.id,STEPS[r.ti].zS)?remDone:remFresh).push({r:r,i:i}); });
+  var ordered=remFresh.concat(remDone);
+
+  var h='';
+  ordered.forEach(function(obj){
+    var r=obj.r, i=obj.i;
+    var dc2=r.d<=0?'exp':r.d<=1?'urg':'ok3';
+    var dl2=r.d<0?Math.abs(r.d)+'gg fa':r.d===0?'Oggi':r.d===1?'Domani':r.d+'gg';
+    var canS=!!(r.s.tel_amb);
+    var info = getContactInfo(r.s.id, STEPS[r.ti].zS);
+    var ct = info.contacted;
+    var ctDot = ct ? "<span style='color:var(--green);margin-right:4px'>🟢</span>" : "";
+    var ctTime = ct ? "<span class='contact-time'>"+formatRelativeTime(info.timestamp)+"</span>" : "";
+    var style = ct ? "style='opacity:.6'" : "";
+    var btnLabel = ct ? 'Già contattato' : '📲';
+    var btnDis = (ct||!canS) ? 'disabled' : '';
+    var btnStyle = ct ? "style='background:var(--bg4);color:var(--text3)'" : '';
+    h+="<div class='ri' "+style+"><div class='rif'><div class='rin'>"+ctDot+r.s.nome+" "+ctTime+"</div><div class='rit'>Step "+(r.ti+1)+": "+STEPS[r.ti].nm+" · "+r.s.ambassador+"</div></div><span class='rd "+dc2+"'>"+dl2+"</span><button class='rwb' onclick='sendR("+i+")' "+btnDis+" "+btnStyle+">"+btnLabel+"</button></div>";
+  });
+  document.getElementById('rl').innerHTML=h;
+}
+
+function sendR(i){
+  var r=_rem[i]; if(!r) return;
+  var btns=document.querySelectorAll('#rl .rwb'); var btn=btns[i];
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  var phs = [r.s.ambassador.split(' ')[0]||'', r.s.nome, STEPS[r.ti].nm];
+  var msgText = buildMsg('reminder', r.s.ambassador, r.s.nome, STEPS[r.ti].nm, r.st?r.st.stato:'', r.st?r.st.scad:null, r.d);
+  sendWA(r.s.tel_amb, phs, function(ok2){
+    if(ok2) markContacted(r.s.id, STEPS[r.ti].zS);
+    if(btn){btn.textContent=ok2?'✓':'✗'; if(ok2)btn.style.background='var(--green)';}
+    toast(ok2?'Inviato a '+r.s.ambassador:'Errore invio', ok2?'ok':'err');
+    if(ok2) renderAll();
+  }, msgText);
+}
+
+function sendAll(){
+  var btn=document.getElementById('rba'); btn.disabled=true; btn.textContent='Invio...';
+  var i=0;
+  function nx(){
+    if(i>=_rem.length){toast('Tutti inviati ✓','ok');btn.disabled=false;btn.textContent='Invia tutti';renderAll();return;}
+    sendR(i++); setTimeout(nx,700);
+  }
+  nx();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER SCUOLE
+// ═══════════════════════════════════════════════════════════════════
+function renderScuole(){
+  var q=(document.getElementById('scq').value||'').toLowerCase();
+  var fs=document.getElementById('scfs').value;
+  var fa=document.getElementById('scfa').value;
+  var stepFilter = document.getElementById('scstep').value;
+  var list=SCHOOLS.filter(function(s){
+    if(fs&&s.status!==fs) return false;
+    if(fa&&s.ambassador!==fa) return false;
+    if(q&&!(s.nome.toLowerCase().includes(q)||s.comune.toLowerCase().includes(q)||s.ambassador.toLowerCase().includes(q)||s.regione.toLowerCase().includes(q))) return false;
+    if(stepFilter){
+      var currentStepIdx = getCurrentStep(s);
+      if(currentStepIdx === -1) return false;
+      if(parseInt(stepFilter) !== currentStepIdx+1) return false;
+    }
+    return true;
+  });
+  txt('scc',list.length+' scuole');
+  document.getElementById('scl').innerHTML=list.length?list.map(sCard).join(''):empty('Nessun risultato');
+}
+
+function popAmb(){
+  var am={};
+  SCHOOLS.forEach(function(s){if(s.ambassador)am[s.ambassador]=1;});
+  var sel=document.getElementById('scfa');
+  sel.innerHTML='<option value="">Tutti ambassador</option>';
+  Object.keys(am).sort().forEach(function(a){sel.innerHTML+='<option>'+a+'</option>';});
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER ALLERTE
+// ═══════════════════════════════════════════════════════════════════
+function renderAllerte(){
+  _allerte=[];
+  var seen={};
+  SCHOOLS.forEach(function(s){
+    var scs=sc(s.status); if(scs==='no') return;
+    s.steps.forEach(function(st,ti){
+      if(st.stato==='FATTO') return;
+      var d=st.scad?dLeft(st.scad):null;
+      var tipo=null, pr=9;
+      if(d!==null && d<=CFG.days && st.stato!=='FATTO'){tipo='scadenza';pr=d<=0?0:1;}
+      else if(st.stato==='BLOCCO'){tipo='blocco';pr=1;}
+      else if(st.stato==='IN CORSO'&&!st.scad){tipo='fermo';pr=3;}
+      else if(scs==='ok'&&ti===0&&st.stato==='DA FARE'){tipo='nuovo';pr=4;}
+      if(!tipo) return;
+      var key=s.id+'_'+tipo;
+      if(seen[key]) return; seen[key]=true;
+      _allerte.push({tipo:tipo,s:s,ti:ti,st:st,d:d,pr:pr});
+    });
+  });
+  _allerte.sort(function(a,b){return a.pr-b.pr||(a.d||99)-(b.d||99);});
+
+  var crit=_allerte.filter(function(a){return a.tipo==='scadenza'||a.tipo==='blocco';});
+  var ab=document.getElementById('ab');
+  if(crit.length){ab.style.display='';ab.textContent=crit.length;}else ab.style.display='none';
+
+  var base=aFilt==='tutti'?_allerte:_allerte.filter(function(a){return a.tipo===aFilt;});
+  var fresh=[], done=[];
+  base.forEach(function(a,i){ (isContacted(a.s.id,STEPS[a.ti].zS)?done:fresh).push({a:a,i:i}); });
+  var list=fresh.concat(done);
+
+  var el=document.getElementById('al');
+  if(!list.length){el.innerHTML=empty('Nessuna allerta attiva ✓');return;}
+
+  var tlbls={scadenza:'In scadenza',blocco:'Bloccato',fermo:'Fermo',nuovo:'Da iniziare'};
+  el.innerHTML=list.map(function(obj){
+    var a=obj.a, i=obj.i;
+    var dc2='',dl2='';
+    if(a.d!==null){dc2=a.d<=0?'de':a.d<=1?'du':'do';dl2=a.d<0?Math.abs(a.d)+'gg fa':a.d===0?'Oggi':a.d===1?'Domani':a.d+'gg';}
+    var canS=!!(a.s.tel_amb);
+    var info = getContactInfo(a.s.id, STEPS[a.ti].zS);
+    var ct = info.contacted;
+    var ctDot = ct ? "<span style='color:var(--green);margin-right:4px'>🟢</span>" : "";
+    var ctTime = ct ? "<span class='contact-time'>"+formatRelativeTime(info.timestamp)+"</span>" : "";
+    var cardStyle = ct ? "style='opacity:.6'" : "";
+    var btnLabel = ct ? 'Già contattato' : '📲 Contatta';
+    var btnDis = (ct||!canS) ? 'disabled' : '';
+    var btnStyle = ct ? "style='background:var(--bg4);color:var(--text3);cursor:default'" : '';
+    return "<div class='alc t"+a.tipo+"' "+cardStyle+"><div class='alt'><div class='aln'>"+ctDot+a.s.nome+" "+ctTime+"</div><span class='altp at"+a.tipo+"'>"+(tlbls[a.tipo]||a.tipo)+"</span></div><div class='als'>Step "+(a.ti+1)+": "+STEPS[a.ti].nm+" — "+a.st.stato+"</div><div class='ala'>"+a.s.ambassador+"</div><div class='alm'>"+(dl2?"<span class='ald "+dc2+"'>"+dl2+"</span>":"")+"<button class='btn-c' onclick='openWaFor("+i+")' "+btnDis+" "+btnStyle+">"+btnLabel+"</button></div></div>";
+  }).join('');
+}
+
+function setAF(f,el){
+  aFilt=f;
+  document.querySelectorAll('#apills .pill').forEach(function(b){b.classList.remove('on');});
+  if(el) el.classList.add('on');
+  renderAllerte();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER URGENTI (invariata)
+// ═══════════════════════════════════════════════════════════════════
+function renderUrgenti(){
+  var list=SCHOOLS.filter(function(s){return sc(s.status)==='ok'&&nFatto(s)<13;});
+  list.sort(function(a,b){return nFatto(a)-nFatto(b);});
+  var el=document.getElementById('ul');
+  if(!list.length){el.innerHTML=empty('Nessuna urgente ✓');return;}
+  el.innerHTML=list.map(function(s){
+    var dn=nFatto(s), pct=Math.round(dn/13*100);
+    var col=dn<4?'var(--red)':dn<9?'var(--yellow)':'var(--green)';
+    var bl=s.steps.filter(function(st){return st.stato==='BLOCCO';}).map(function(st,i){return STEPS[i].nm;}).filter(Boolean);
+    var nx=null; for(var i=0;i<s.steps.length;i++){if(s.steps[i].stato!=='FATTO'){nx=STEPS[i];break;}}
+    var tag=bl.length?"<div class='ut' style='color:var(--red)'>BLOCCO: "+bl.join(', ')+"</div>":nx?"<div class='ut' style='color:var(--yellow)'>Step "+nx.id+": "+nx.nm+"</div>":'';
+    return "<div class='uc' onclick='openSch(\""+s.id+"\")'>" +tag+"<div class='un'>"+s.nome+"</div><div style='font-size:11px;color:var(--text2)'>"+s.comune+(s.ambassador?" <span style='color:var(--purple)'>"+s.ambassador+"</span>":"")+"</div><div class='pr'><div class='prb'><div class='prf' style='width:"+pct+"%;background:"+col+"'></div></div><div class='prp'>"+dn+"/13</div></div></div>";
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER AMBASSADOR (invariata)
+// ═══════════════════════════════════════════════════════════════════
+function renderAmb(){
+  var map={};
+  SCHOOLS.forEach(function(s){
+    var a=s.ambassador||'N/A';
+    if(!map[a]) map[a]={t:0,ok:0,no:0,att:0,dn:0};
+    map[a].t++;
+    var c=sc(s.status);
+    if(c==='ok') map[a].ok++;
+    if(c==='no') map[a].no++;
+    if(c==='att') map[a].att++;
+    map[a].dn+=nFatto(s);
+  });
+  var arr=Object.keys(map).sort(function(a,b){return map[b].ok-map[a].ok;});
+  document.getElementById('ambl').innerHTML=arr.map(function(nm){
+    var d=map[nm], pct=d.t?Math.round(d.dn/(d.t*13)*100):0;
+    return "<div class='ac'><div class='an'>👤 "+nm+"</div><div class='as'><div class='ai'><strong>"+d.t+"</strong> scuole</div><div class='ai' style='color:var(--green)'><strong>"+d.ok+"</strong> acc.</div><div class='ai' style='color:var(--yellow)'><strong>"+d.att+"</strong> cont.</div><div class='ai' style='color:var(--red)'><strong>"+d.no+"</strong> rif.</div></div><div style='font-size:11px;color:var(--text2);margin-bottom:6px'>Step completati: "+pct+"% ("+d.dn+"/"+(d.t*13)+")</div><div class='prb'><div class='prf' style='width:"+pct+"%;background:var(--purple)'></div></div></div>";
+  }).join('')||empty('Nessun ambassador');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MODAL DETTAGLIO SCUOLA
+// ═══════════════════════════════════════════════════════════════════
+function openSch(id){
+  var s=SCHOOLS.find(function(x){return String(x.id)===String(id);});
+  if(!s) return; CS=s; CSI=null;
+  txt('mo-name',s.nome);
+  document.getElementById('mo-badge').innerHTML=badgeH(s.status);
+  var infoItems=[
+    {l:'Rappresentante',v:s.referente},{l:'Tel Rappr',v:s.tel_ref},
+    {l:'Ambassador',v:s.ambassador},{l:'Tel Ambassador',v:s.tel_amb},
+    {l:'Comune',v:s.comune},{l:'Regione',v:s.regione},
+    {l:'Studenti',v:s.studenti},{l:'Provincia',v:s.provincia}
+  ];
+  document.getElementById('mo-info').innerHTML=infoItems.filter(function(i){return !!i.v;}).map(function(i){
+    return "<div class='ii'><div class='il'>"+i.l+"</div><div class='iv'>"+i.v+"</div></div>";
+  }).join('');
+  document.getElementById('mo-steps').innerHTML=s.steps.map(function(st,ti){
+    var d=st.scad?dLeft(st.scad):null;
+    var hasAlert=st.stato!=='FATTO'&&d!==null&&d<=CFG.days;
+    var sub='';
+    if(st.scad) sub+='Scad: '+String(st.scad).substring(0,10);
+    if(d!==null&&st.stato!=='FATTO'){var ds=d<=0?' SCADUTO':d===1?' domani':d<=CFG.days?' '+d+'gg':'';if(ds)sub+=(sub?'  ':'')+ds;}
+    if(st.note) sub+=(sub?'  ·  ':'')+st.note.substring(0,30)+(st.note.length>30?'...':'');
+    var badgeClass = getStepBadgeClass(st.stato);
+    var info = getContactInfo(s.id, STEPS[ti].zS);
+    var contactedBadge = info.contacted ? "<span class='contacted-badge'>✓ Contattato</span><div class='contacted-badge-full'>Ultimo contatto: "+formatFullDateTime(info.timestamp)+"</div>" : "";
+    return "<div class='str"+(hasAlert?' ar':'')+"' onclick='openSE("+ti+")'><div class='stn'>"+(STEPS[ti].id<10?'0':'')+STEPS[ti].id+"</div><div class='sti'><div class='stnm'>"+STEPS[ti].nm+contactedBadge+"</div>"+(sub?"<div class='sts'>"+sub+"</div>":"")+"</div><span class='stb "+badgeClass+"'>"+st.stato+"</span><div class='chv'><svg viewBox='0 0 24 24'><polyline points='9 18 15 12 9 6'/></svg></div></div>";
+  }).join('');
+  document.getElementById('mo').classList.add('on');
+}
+function closeMo(){ document.getElementById('mo').classList.remove('on'); }
+document.getElementById('mo').addEventListener('click',function(e){if(e.target===this)closeMo();});
+
+// ═══════════════════════════════════════════════════════════════════
+// PANEL STEP EDIT
+// ═══════════════════════════════════════════════════════════════════
+function openSE(ti){
+  if(!CS) return; CSI=ti;
+  var st=CS.steps[ti];
+  txt('pnt','Step '+STEPS[ti].id+' — '+STEPS[ti].nm);
+  txt('pns',CS.nome);
+  document.getElementById('pstato').value=st.stato||'DA FARE';
+  document.getElementById('pscad').value=st.scad?String(st.scad).substring(0,10):'';
+  document.getElementById('pnote').value=st.note||'';
+  document.getElementById('pnwa').disabled=!CS.tel_amb;
+  openPanel('pn-step');
+}
+
+function saveStep(){
+  if(!CS||CSI===null) return;
+  var btn=document.getElementById('pnsave'); btn.disabled=true; btn.textContent='Salvataggio...';
+  var stato=document.getElementById('pstato').value;
+  var scad=document.getElementById('pscad').value;
+  var note=document.getElementById('pnote').value;
+  var st=STEPS[CSI];
+  var f={}; f[st.zS]=stato; f[st.zN]=note; if(scad) f[st.zD]=scad;
+  patchSchool(CS.id, f, function(e){
+    if(e){ toast('Errore: '+e.message,'err'); }
+    else{
+      CS.steps[CSI].stato=stato;
+      CS.steps[CSI].note=note;
+      if(scad) CS.steps[CSI].scad=scad;
+      toast('Salvato ✓','ok');
+      closePanel('pn-step');
+      openSch(CS.id);
+      renderHome();
+    }
+    btn.disabled=false; btn.textContent='💾 Salva su Zoho';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// WA PANEL
+// ═══════════════════════════════════════════════════════════════════
+function buildMsg(tipo,amb,sch,stepNm,stato,scad,d){
+  var f=amb?amb.split(' ')[0]:'';
+  var m='Ciao'+(f?' '+f:'')+'!\n\n';
+  if(tipo==='blocco') return m+'Lo step "'+stepNm+'" per '+sch+' è in BLOCCO.\nCome posso aiutarti?';
+  if(tipo==='inizio') return m+sch+' ha accettato la collaborazione!\nQuando puoi fare la prima call? (Step 1)';
+  if(tipo==='update') return m+'Come procede con '+sch+'?\nStep: '+stepNm+'\nStato attuale: '+stato+'\nRispondi: FATTO / IN CORSO / IN ATTESA / BLOCCO';
+  m+='📌 Reminder: '+sch+'\nStep: '+stepNm+'\n';
+  if(stato&&stato!=='DA FARE') m+='Stato: '+stato+'\n';
+  if(scad){m+='Scadenza: '+String(scad).substring(0,10);if(d!==undefined){if(d<=0)m+=' ⚠ SCADUTO';else if(d===1)m+=' (domani!)';else m+=' (tra '+d+'gg)';}m+='\n';}
+  m+='\nRispondi:\n✅ FATTO\n🔄 IN CORSO\n⏳ IN ATTESA\n🚫 BLOCCO';
+  return m;
+}
+
+function openWaFor(i){
+  var a=_allerte[i]; if(!a) return;
+  _cwa={s:a.s,ti:a.ti,st:a.st,d:a.d,tipo:a.tipo};
+  _openWa();
+}
+function openWaFromStep(){
+  if(!CS||CSI===null) return;
+  var stato=document.getElementById('pstato').value;
+  var scad=document.getElementById('pscad').value;
+  _cwa={s:CS,ti:CSI,st:{stato:stato,scad:scad,note:''},d:scad?dLeft(scad):null,tipo:'reminder'};
+  _openWa();
+}
+function _openWa(){
+  var a=_cwa;
+  txt('wa-sub',a.s.nome);
+  txt('wa-info','Step '+(a.ti+1)+': '+STEPS[a.ti].nm+' — '+a.st.stato);
+  var sel=document.getElementById('wa-tipo');
+  if(a.tipo==='blocco') sel.value='blocco';
+  else if(a.tipo==='nuovo') sel.value='inizio';
+  else if(a.tipo==='fermo') sel.value='update';
+  else sel.value='reminder';
+  document.getElementById('wa-phone').value=a.s.tel_amb?normalizePhone(a.s.tel_amb):'';
+  document.getElementById('wa-nk').style.display='none';
+  document.getElementById('wa-btn').disabled=!a.s.tel_amb;
+  updateWaPrev();
+  openPanel('pn-wa');
+}
+function updateWaPrev(){
+  if(!_cwa) return;
+  var tipo=document.getElementById('wa-tipo').value;
+  document.getElementById('wa-cw').style.display=tipo==='custom'?'':'none';
+  var a=_cwa;
+  var msg=tipo==='custom'
+    ? (document.getElementById('wa-ct').value||'...')
+    : buildMsg(tipo,a.s.ambassador,a.s.nome,STEPS[a.ti].nm,a.st.stato,a.st.scad,a.d);
+  document.getElementById('wa-prev').textContent=msg;
+}
+function doSendWA(){
+  if(!_cwa) return;
+  var btn=document.getElementById('wa-btn');
+  var ph=document.getElementById('wa-phone').value.trim();
+  if(!ph){toast('Inserisci numero','err');return;}
+  btn.disabled=true; btn.textContent='Invio...';
+  var a=_cwa;
+  var tipo=document.getElementById('wa-tipo').value;
+  var msgText = tipo==='custom'
+    ? document.getElementById('wa-ct').value
+    : buildMsg(tipo, a.s.ambassador, a.s.nome, STEPS[a.ti].nm, a.st.stato, a.st.scad, a.d);
+  var phs = [a.s.ambassador.split(' ')[0]||'', a.s.nome, STEPS[a.ti].nm];
+  var _waTipo=(function(){var el=document.getElementById('wa-tipo');return el?el.value:'reminder';})();
+  sendWA(ph, phs, function(ok5,status){
+    if(ok5){markContacted(a.s.id, STEPS[a.ti].zS);toast('WhatsApp inviato ✓','ok');closePanel('pn-wa');closePanel('pn-step');}
+    else toast('Errore invio (HTTP '+status+')','err');
+    btn.disabled=false; btn.textContent='Invia ora 📨';
+    if(ok5) renderAll();
+  }, msgText, _waTipo);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SCADENZE
+// ═══════════════════════════════════════════════════════════════════
+var _scadExp = {};
+
+function scadLevel(d, stato) {
+  if (stato === 'FATTO') return 'ok';
+  if (d === null) return 'none';
+  if (d < 0) return 'scaduto';
+  if (d <= 2) return 'urgente';
+  if (d <= 7) return 'inscadenza';
+  return 'ok';
+}
+
+function scadIcon(lv) {
+  return lv==='scaduto'?'🔴':lv==='urgente'?'🟠':lv==='inscadenza'?'🟡':lv==='ok'?'🟢':'⚫';
+}
+
+function scadCls(lv) {
+  return lv==='scaduto'?'sd-sc':lv==='urgente'?'sd-ur':lv==='inscadenza'?'sd-is':lv==='ok'?'sd-ok':'sd-no';
+}
+
+function schoolSemaforo(s) {
+  var order=['scaduto','urgente','inscadenza','ok','none'];
+  var worst='none';
+  for (var i=0;i<s.steps.length;i++) {
+    var st=s.steps[i]; if(st.stato==='FATTO') continue;
+    var lv=scadLevel(st.scad?dLeft(st.scad):null, st.stato);
+    if(order.indexOf(lv)<order.indexOf(worst)) worst=lv;
+  }
+  return worst;
+}
+
+function toggleSkCard(id) {
+  _scadExp[id]=!_scadExp[id];
+  var el=document.getElementById('sk-'+id);
+  if(el) el.classList.toggle('open',!!_scadExp[id]);
+}
+
+function renderScadenze() {
+  var fAmb  = document.getElementById('sf-amb')  ? document.getElementById('sf-amb').value  : '';
+  var fStato= document.getElementById('sf-stato') ? document.getElementById('sf-stato').value: '';
+  var fUrg  = document.getElementById('sf-urg')  ? document.getElementById('sf-urg').value  : 'tutti';
+
+  var selAmb=document.getElementById('sf-amb');
+  if(selAmb){
+    var prevAmb=selAmb.value;
+    selAmb.innerHTML='<option value="">Tutti ambassador</option>';
+    var am={};
+    SCHOOLS.forEach(function(s){if(s.ambassador)am[s.ambassador]=1;});
+    Object.keys(am).sort().forEach(function(a){selAmb.innerHTML+='<option value="'+a+'">'+a+'</option>';});
+    if(prevAmb) selAmb.value=prevAmb;
+  }
+
+  var list=SCHOOLS.filter(function(s){
+    if(sc(s.status)!=='ok') return false;
+    if(fAmb&&s.ambassador!==fAmb) return false;
+    return true;
+  });
+
+  if(fUrg!=='tutti'){
+    list=list.filter(function(s){
+      return s.steps.some(function(st,ti){
+        if(st.stato==='FATTO') return false;
+        if(fStato&&st.stato!==fStato) return false;
+        var d=st.scad?dLeft(st.scad):null;
+        var lv=scadLevel(d,st.stato);
+        return lv===fUrg;
+      });
+    });
+  }
+
+  var sOrder=['scaduto','urgente','inscadenza','ok','none'];
+  list.sort(function(a,b){ return sOrder.indexOf(schoolSemaforo(a))-sOrder.indexOf(schoolSemaforo(b)); });
+
+  var scaduti=0, urgenti=0;
+  list.forEach(function(s){
+    var lv=schoolSemaforo(s);
+    if(lv==='scaduto') scaduti++;
+    else if(lv==='urgente') urgenti++;
+  });
+  txt('scad-sub', list.length+' scuole · 🔴 '+scaduti+' scadute · 🟠 '+urgenti+' urgenti');
+
+  var scadb=document.getElementById('scadb');
+  var tot=scaduti+urgenti;
+  if(scadb){scadb.textContent=tot;scadb.style.display=tot?'':'none';}
+
+  var el=document.getElementById('scad-list');
+  if(!el) return;
+  if(!list.length){el.innerHTML=empty('Nessuna scuola in scadenza ✓');renderSgrav();return;}
+
+  el.innerHTML=list.map(function(s){
+    var sem=schoolSemaforo(s);
+    var dn=nFatto(s), pct=Math.round(dn/13*100);
+    var isOpen=!!_scadExp[s.id];
+
+    var stepsHtml=s.steps.map(function(st,ti){
+      if(fStato&&st.stato!==fStato&&st.stato!=='FATTO') return '';
+      var d=st.scad?dLeft(st.scad):null;
+      var lv=scadLevel(d,st.stato);
+      if(fUrg!=='tutti'&&st.stato!=='FATTO'&&lv!==fUrg) return '';
+      var icon=scadIcon(lv);
+      var cls=scadCls(lv);
+      var dStr='';
+      if(st.stato==='FATTO') dStr='<span class="sd-ok">✓ Fatto</span>';
+      else if(d===null) dStr='<span class="sd-no">—</span>';
+      else if(d<0) dStr='<span class="'+cls+'">'+Math.abs(d)+'gg fa</span>';
+      else if(d===0) dStr='<span class="'+cls+'">Oggi</span>';
+      else if(d===1) dStr='<span class="'+cls+'">Domani</span>';
+      else dStr='<span class="'+cls+'">'+d+'gg</span>';
+      var info = getContactInfo(s.id, STEPS[ti].zS);
+      var contactedBadge = info.contacted ? "<span class='contacted-badge' style='margin-left:6px;'>✓ Contattato "+formatRelativeTime(info.timestamp)+"</span>" : "";
+      return "<div class='sk-step'><div class='sk-step-dot'>"+icon+"</div><div class='sk-step-nm'>"+STEPS[ti].nm+contactedBadge+"</div><span class='sk-step-stato "+getStepBadgeClass(st.stato)+"'>"+st.stato+"</span><div class='sk-step-d'>"+dStr+"</div></div>";
+    }).join('');
+
+    return "<div class='sk"+(isOpen?' open':'')+"' id='sk-"+s.id+"'>"
+      +"<div class='sk-hd' onclick='toggleSkCard(\""+s.id+"\")'>"
+        +"<div class='sk-sem'>"+scadIcon(sem)+"</div>"
+        +"<div class='sk-info'><div class='sk-nome'>"+s.nome+"</div><div class='sk-meta'>"+s.ambassador+(s.comune?' · '+s.comune:'')+"</div></div>"
+        +"<div class='sk-prog'><div class='sk-pct'>"+dn+"/13</div><div class='sk-bar'><div class='sk-barf' style='width:"+pct+"%'></div></div></div>"
+        +"<div class='sk-chv'><svg viewBox='0 0 24 24'><polyline points='9 18 15 12 9 6'/></svg></div>"
+      +"</div>"
+      +(stepsHtml?"<div class='sk-steps'>"+stepsHtml+"</div>":"")
+      +"</div>";
+  }).join('');
+
+  renderSgrav();
+}
+
+function renderSgrav() {
+  var el=document.getElementById('sgrav-list');
+  if(!el) return;
+  var byAmb={};
+  SCHOOLS.forEach(function(s){
+    if(sc(s.status)!=='ok') return;
+    s.steps.forEach(function(st,ti){
+      if(st.stato!=='IN CORSO') return;
+      var d=st.scad?dLeft(st.scad):null;
+      if(d===null||d>=-7) return;
+      var a=s.ambassador||'N/A';
+      if(!byAmb[a]) byAmb[a]=[];
+      byAmb[a].push({nome:s.nome,step:STEPS[ti].nm,d:d});
+    });
+  });
+  var keys=Object.keys(byAmb).sort();
+  if(!keys.length){el.innerHTML='';return;}
+  el.innerHTML="<div class='sgrav-sec'><div class='sgrav-t'>🚨 Chi sta sgravando (step IN CORSO scaduti da >7gg)</div>"
+    +keys.map(function(amb){
+      var rows=byAmb[amb].map(function(r){
+        return "<div class='sgrav-item'>"+r.nome+" · "+r.step+" <span style='color:var(--red)'>"+Math.abs(r.d)+"gg fa</span></div>";
+      }).join('');
+      return "<div class='sgrav-row'><div class='sgrav-amb'>👤 "+amb+"</div>"+rows+"</div>";
+    }).join('')+"</div>";
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAV / PANELS / TOAST
+// ═══════════════════════════════════════════════════════════════════
+function goPage(n,btn){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pg-'+n).classList.add('on');
+  if(btn) btn.classList.add('on');
+  curPage=n;
+  if(n==='scuole'){renderScuole();}
+  if(n==='urgenti'){renderUrgenti();}
+  if(n==='amb'){renderAmb();}
+  if(n==='allerte'){renderAllerte();}
+  if(n==='set'){fillSettings();}
+  if(n==='contattati'){renderContattati();}
+  if(n==='scadenze'){renderScadenze();}
+}
+function openPanel(id){document.getElementById(id).classList.add('on');}
+function closePanel(id){document.getElementById(id).classList.remove('on');}
+var _tt=null;
+function toast(m,t){
+  var el=document.getElementById('toast');
+  el.textContent=m; el.className='toast'+(t?' '+t:'')+' vis';
+  if(_tt) clearTimeout(_tt);
+  _tt=setTimeout(function(){el.className='toast'+(t?' '+t:'');},3500);
+}
+function empty(m){return "<div class='empty'><div class='empty-ic'>✓</div>"+m+"</div>";}
+function doRefresh(btn){
+  if(btn){btn.style.opacity='.4';btn.style.pointerEvents='none';}
+  syncing=false;
+  fetchSchools();
+  if(btn) setTimeout(function(){btn.style.opacity='';btn.style.pointerEvents='';},2500);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER ALL + INIT
+// ═══════════════════════════════════════════════════════════════════
+function renderAll(){
+  popAmb();
+  renderHome();
+  renderAllerte();
+  renderScadenze();
+  if(curPage==='scuole') renderScuole();
+  if(curPage==='urgenti') renderUrgenti();
+  if(curPage==='amb') renderAmb();
+  if(curPage==='scadenze') renderScadenze();
+  if(curPage==='contattati') renderContattati();
+}
+
+document.getElementById('hdate').textContent=new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+updateCtBadge();
+
+fetchSchools();
+setInterval(function(){if(!syncing) fetchSchools();}, 30000);
+</script>
+</body>
+</html>
